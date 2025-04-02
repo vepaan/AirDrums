@@ -1,13 +1,16 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
+using namespace std;
+using namespace cv;
+
 int main() {
-    cv::Mat img = cv::imread("test.png");
+    Mat img = imread("test.png");
     if (img.empty()) {
-        std::cerr << "Image not found!" << std::endl;
+        cerr << "Image not found!" << endl;
         return -1;
     }
-    cv::imshow("Test Image", img);
-    cv::waitKey(0);
+    imshow("Test Image", img);
+    waitKey(0);
     return 0;
 }
