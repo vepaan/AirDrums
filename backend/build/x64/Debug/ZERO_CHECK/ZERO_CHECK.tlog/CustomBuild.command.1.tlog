@@ -1,0 +1,10 @@
+^C:\USERS\ASUS\DOCUMENTS\GITHUB\AIRDRUMS\BACKEND\BUILD\CMAKEFILES\4103F670D8082B6C61806D75BAFD12BC\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/ASUS/Documents/GitHub/AirDrums/backend -BC:/Users/ASUS/Documents/GitHub/AirDrums/backend/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/ASUS/Documents/GitHub/AirDrums/backend/build/AirDrums.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

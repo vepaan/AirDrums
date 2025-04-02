@@ -1,0 +1,3 @@
+C:/Users/ASUS/Documents/GitHub/AirDrums/backend/build/CMakeFiles/AirDrums.dir
+C:/Users/ASUS/Documents/GitHub/AirDrums/backend/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/ASUS/Documents/GitHub/AirDrums/backend/build/CMakeFiles/ZERO_CHECK.dir

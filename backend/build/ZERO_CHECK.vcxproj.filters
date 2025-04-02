@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\ASUS\Documents\GitHub\AirDrums\backend\build\CMakeFiles\4103f670d8082b6c61806d75bafd12bc\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{6C41DF2A-961F-33D3-A2C8-0809EA5BDA9F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
