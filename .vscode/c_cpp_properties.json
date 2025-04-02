@@ -3,8 +3,7 @@
     {
       "name": "windows-gcc-x64",
       "includePath": [
-        "${workspaceFolder}/**",
-        "C:/opencv/build/include"
+        "${workspaceFolder}/**"
       ],
       "compilerPath": "C:/TDM-GCC-64/bin/gcc.exe",
       "cStandard": "${default}",
