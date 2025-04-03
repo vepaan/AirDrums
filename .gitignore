@@ -1,3 +1,4 @@
 .env
 backend/venv
 .vscode
+backend/build
