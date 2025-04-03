@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
-import mediapipe
-
+import mediapipe as mp
 
 def find_best_cam():
     max_res, best_idx = 0, -1
@@ -34,12 +33,24 @@ if not cap.isOpened():
 
 print("Using camera ", best_idx)
 
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.7)
+mp_drawing = mp.solutions.drawing_utils
+
 while True:
     ret, frame = cap.read()
     if not ret:
         break
 
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = hands.process(rgb_frame)
+
+    if results.multi_hand_landmarks:
+        for hand_landmarks in results.multi_hand_landmarks:
+            mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
     cv2.imshow("AirDrums", frame)
+
     if cv2.waitKey(1) == ord('q'):
         break
 
