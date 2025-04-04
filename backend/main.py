@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 import mediapipe as mp
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
+import time
 
 #This finds the best camera available and returns the index
 def find_best_cam():
@@ -49,6 +52,7 @@ def init_kalman_filter():
     return filters
 
 
+#setup camera start
 cap = cv2.VideoCapture();
 best_idx = find_best_cam()
 kalman_filters = init_kalman_filter()
@@ -59,10 +63,14 @@ if not cap.isOpened():
 
 print("Using camera ", best_idx)
 
+
+#loading and initializing hand detection model
 mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.7)
+hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
 mp_drawing = mp.solutions.drawing_utils
 
+
+#camera instance
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -94,5 +102,7 @@ while cap.isOpened():
     if cv2.waitKey(1) == ord('q'):
         break
 
+
+#terminating camera task
 cap.release()
 cv2.destroyAllWindows()
