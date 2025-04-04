@@ -27,10 +27,8 @@ def find_best_cam():
 
 
 #Initialize Kalman filtering to better capture jitters not picked up by mediapipe
-def init_kalman_filter():
+def init_kalman_filter(num_landmarks):
     filters = []
-    num_landmarks = len(mp.solutions.hands.HandLandmark)
-
     for _ in range(num_landmarks):
         # 4 state variables (x, y, vx, vy) and 2 measurement variables (x, y)
         kalman = cv2.KalmanFilter(4, 2)
@@ -52,7 +50,8 @@ def init_kalman_filter():
 
 
 #apply kalman function to actually apply the function
-def apply_kalman_filter(frame, landmarks):
+def apply_kalman_filter(frame, landmarks, kalman_filters):
+
     #now we apply kalman filter here
     for i, landmark in enumerate(landmarks.landmark):
         x, y = int(landmark.x * frame.shape[1]), int(landmark.y * frame.shape[0]) #pixel covo
@@ -69,7 +68,7 @@ def apply_kalman_filter(frame, landmarks):
 
 
 #we process the detected landmark results by drawing them onto the screen
-def process_detection_results(frame, results, result_type, apply_kalman=False):
+def process_detection_results(frame, results, result_type, apply_kalman=[]):
 
     if result_type == 'hand':
         landmarks_list = results.multi_hand_landmarks
@@ -78,7 +77,9 @@ def process_detection_results(frame, results, result_type, apply_kalman=False):
         if landmarks_list:
             for landmark in landmarks_list:
                 if apply_kalman:
-                    apply_kalman_filter(frame=frame, landmarks=landmark)
+                    apply_kalman_filter(frame=frame, 
+                                        landmarks=landmark,
+                                        kalman_filters=apply_kalman)
 
                 mp_drawing.draw_landmarks(frame, landmark, connections)
 
@@ -88,7 +89,9 @@ def process_detection_results(frame, results, result_type, apply_kalman=False):
 
         if landmarks_list:
             if apply_kalman:
-                apply_kalman_filter(frame=frame, landmarks=landmarks_list)
+                apply_kalman_filter(frame=frame, 
+                                    landmarks=landmarks_list,
+                                    kalman_filters=apply_kalman)
 
             mp_drawing.draw_landmarks(frame, landmarks_list, connections)
 
@@ -100,7 +103,10 @@ def process_detection_results(frame, results, result_type, apply_kalman=False):
 #setup camera start
 cap = cv2.VideoCapture();
 best_idx = find_best_cam()
-kalman_filters = init_kalman_filter()
+
+#Initizling Kalman filters
+kalman_filters_hand = init_kalman_filter(num_landmarks=len(mp.solutions.hands.HandLandmark))
+kalman_filters_pose = init_kalman_filter(num_landmarks=len(mp.solutions.pose.PoseLandmark))
 
 cap.open(best_idx)
 if not cap.isOpened():
@@ -132,9 +138,9 @@ while cap.isOpened():
 
     #now we process both the results in two different threads for parallelism
     process_detection_results(frame=frame,
-                              results=hand_results,
-                              result_type='hand',
-                              apply_kalman=True)
+                              results=pose_results,
+                              result_type='pose',
+                              apply_kalman=kalman_filters_pose)
 
     cv2.imshow("AirDrums", frame)
 
