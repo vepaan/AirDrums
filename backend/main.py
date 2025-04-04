@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import mediapipe as mp
-import threading
 
 #This finds the best camera available and returns the index
 def find_best_cam():
@@ -120,7 +119,7 @@ mp_hands = mp.solutions.hands
 mp_pose = mp.solutions.pose
 
 hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.3)
-pose = mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.5)
+pose = mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.3)
 
 mp_drawing = mp.solutions.drawing_utils
 
@@ -140,12 +139,12 @@ while cap.isOpened():
     process_detection_results(frame=frame,
                               results=hand_results,
                               result_type='hand',
-                              apply_kalman=kalman_filters_hand)
+                              apply_kalman=[])
 
     process_detection_results(frame=frame,
                               results=pose_results,
                               result_type='pose',
-                              apply_kalman=kalman_filters_pose)
+                              apply_kalman=[])
 
     cv2.imshow("AirDrums", frame)
 
