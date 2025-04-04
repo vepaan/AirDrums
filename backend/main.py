@@ -1,9 +1,7 @@
 import cv2
 import numpy as np
 import mediapipe as mp
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
-import time
+import threading
 
 #This finds the best camera available and returns the index
 def find_best_cam():
@@ -52,6 +50,53 @@ def init_kalman_filter():
     return filters
 
 
+
+#apply kalman function to actually apply the function
+def apply_kalman_filter(frame, landmarks):
+    #now we apply kalman filter here
+    for i, landmark in enumerate(landmarks.landmark):
+        x, y = int(landmark.x * frame.shape[1]), int(landmark.y * frame.shape[0]) #pixel covo
+
+        measured = np.array([[np.float32(x)], [np.float32(y)]])
+        kalman_filters[i].correct(measured)
+        prediction = kalman_filters[i].predict()
+        px, py = int(prediction[0]), int(prediction[1])
+
+        #drawing both og and filtered points
+        cv2.circle(frame, (x, y), 4, (0, 0, 255), -1) #red - raw
+        cv2.circle(frame, (px, py), 4, (0, 255, 0), -1) #green - kalman
+
+
+
+#we process the detected landmark results by drawing them onto the screen
+def process_detection_results(frame, results, result_type, apply_kalman=False):
+
+    if result_type == 'hand':
+        landmarks_list = results.multi_hand_landmarks
+        connections = mp_hands.HAND_CONNECTIONS
+
+        if landmarks_list:
+            for landmark in landmarks_list:
+                if apply_kalman:
+                    apply_kalman_filter(frame=frame, landmarks=landmark)
+
+                mp_drawing.draw_landmarks(frame, landmark, connections)
+
+    elif result_type == 'pose':
+        landmarks_list = results.pose_landmarks
+        connections = mp_pose.POSE_CONNECTIONS
+
+        if landmarks_list:
+            if apply_kalman:
+                apply_kalman_filter(frame=frame, landmarks=landmarks_list)
+
+            mp_drawing.draw_landmarks(frame, landmarks_list, connections)
+
+    else:
+        raise Exception("Unsupported type of detection. Choose either 'hand' or 'pair'")
+
+    
+
 #setup camera start
 cap = cv2.VideoCapture();
 best_idx = find_best_cam()
@@ -64,9 +109,13 @@ if not cap.isOpened():
 print("Using camera ", best_idx)
 
 
-#loading and initializing hand detection model
+#loading and initializing hand and pose detection model
 mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
+mp_pose = mp.solutions.pose
+
+hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.3)
+pose = mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.5)
+
 mp_drawing = mp.solutions.drawing_utils
 
 
@@ -77,25 +126,15 @@ while cap.isOpened():
         break
 
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    results = hands.process(rgb_frame)
+    
+    hand_results = hands.process(rgb_frame)
+    pose_results = pose.process(rgb_frame)
 
-    if results.multi_hand_landmarks:
-        for hand_landmarks in results.multi_hand_landmarks:
-            
-            #now we apply kalman filter here
-            for i, landmark in enumerate(hand_landmarks.landmark):
-                x, y = int(landmark.x * frame.shape[1]), int(landmark.y * frame.shape[0]) #pixel covo
-
-                measured = np.array([[np.float32(x)], [np.float32(y)]])
-                kalman_filters[i].correct(measured)
-                prediction = kalman_filters[i].predict()
-                px, py = int(prediction[0]), int(prediction[1])
-
-                #drawing both og and filtered points
-                cv2.circle(frame, (x, y), 4, (0, 0, 255), -1) #red - raw
-                cv2.circle(frame, (px, py), 4, (0, 255, 0), -1) #green - kalman
-
-            mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+    #now we process both the results in two different threads for parallelism
+    process_detection_results(frame=frame,
+                              results=hand_results,
+                              result_type='hand',
+                              apply_kalman=True)
 
     cv2.imshow("AirDrums", frame)
 
