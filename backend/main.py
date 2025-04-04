@@ -136,7 +136,12 @@ while cap.isOpened():
     hand_results = hands.process(rgb_frame)
     pose_results = pose.process(rgb_frame)
 
-    #now we process both the results in two different threads for parallelism
+    #now we process both the results
+    process_detection_results(frame=frame,
+                              results=hand_results,
+                              result_type='hand',
+                              apply_kalman=kalman_filters_hand)
+
     process_detection_results(frame=frame,
                               results=pose_results,
                               result_type='pose',
